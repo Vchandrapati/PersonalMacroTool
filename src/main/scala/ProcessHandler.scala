@@ -12,26 +12,25 @@ object ProcessHandler {
   def findAndKillProcess(processName: String): Unit = {
     pid match {
       //if pid is tracked kill and restart it
-      case Some(pid) =>
+      case Some(pid) if ProcessHandle.of(pid).isPresent =>
         val process = ProcessHandle.of(pid).get()
         //if the pid is not stale kill app
         if(checkValidPID(process, processName)) process.destroy()
       //if untracked process find and kill it
       case None =>
         //search list of all process for correct app
-        val processList = ProcessHandle.allProcesses()
-        val process = processList.filter(p => p.info().command().isPresent &&
-          p.info().command().get().contains(processName)).toList
-
-        //if list is empty indicates process is not active
-        if (process.size() == 0) return
-        process.get(0).destroy()
+        log("Searching processes")
+        ProcessHandle.allProcesses().forEach { process =>
+          val info = process.info()
+          if(info.command().isPresent && info.command().get().contains(processName)) process.destroy()
+        }
     }
   }
 
   def restartProcess(): Unit = {
     // Ensure the file exists
     if (new File(iCuePath).exists()) {
+      log("Restarting process")
       val pb = new ProcessBuilder(iCuePath)
       try {
         val p = pb.start()

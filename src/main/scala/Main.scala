@@ -57,7 +57,7 @@ object Main extends NativeKeyListener {
       })
 
       resetICUE.addActionListener((e: ActionEvent) => {
-        ProcessHandler.findAndKillProcess("iCUE.exe")
+        ProcessHandler.findAndKillProcess("iCUE")
         ProcessHandler.restartProcess()
       })
 
